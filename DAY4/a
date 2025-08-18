@@ -1,0 +1,147 @@
+
+void mergeSort(int arr[], int l, int h)
+{
+    if (l < h)
+    {
+        int mid = (l + h) / 2;
+        mergeSort(arr, l, mid);
+        mergeSort(arr, mid + 1, h);
+        merge(arr, l, mid, h);
+    }
+}
+
+void merge(int arr[],int l, int mid, int h)
+{
+    int i=l,j=mid+1,k=i;
+    int B[1000];
+    while(i<=mid && j <=h)
+    {
+        if(arr[i]<arr[j])
+            B[k++]=arr[i++];
+        else
+            B[k++]=arr[j++];
+    }
+    for(; i<=mid; i++)
+        B[k++]=arr[i];
+    for(; j<= h; j++)
+        B[k++]=arr[j];
+    for(i=l;i<=h;i++)
+        arr[i]=B[i];
+}
+
+void asce_dat()
+{   
+    struct timespec start, end;
+    long exec_time;
+    FILE *inFile,*outFile;
+    int arr[1000], n=0;
+    inFile = fopen("inAsce.dat", "r");
+
+    if(inFile==NULL)
+    {
+        printf("Error");
+        return;
+    }
+    while(fscanf(inFile, "%d", &arr[n]) == 1) 
+        n++;
+    fclose(inFile);
+    
+    printf("Before Sorting: ");
+    for(int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+    int comp = 0;
+
+    mergeSort(arr, 0, n - 1);
+    
+    printf("After Sorting: ");
+    for(int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+    outFile = fopen("outMergeAsce.dat", "w");
+
+    for(int i = 0; i < n; i++){
+        fprintf(outFile, "%d ", arr[i]);
+    }
+    fclose(outFile);
+    
+    printf("Number of Comparisons: %d\n", comp);
+    printf("Actual Execution Time: %ld nanoseconds\n", exec_time);
+
+}
+void desc_dat() 
+{
+    struct timespec start, end;
+    long exec_time;
+    FILE *inFile,*outFile;
+    int arr[1000], n=0;
+    inFile = fopen("inDesc.dat", "r");
+    if(inFile==NULL)
+    {
+        printf("Error");
+        return;
+    }
+    while(fscanf(inFile, "%d", &arr[n]) == 1) 
+        n++;
+    fclose(inFile);
+
+    printf("Before Sorting: ");
+    for(int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+    int comp = 0;
+
+    mergeSort(arr, 0, n - 1);
+
+    printf("After Sorting: ");
+    for(int i = n - 1; i >= 0; i--)
+        printf("%d ", arr[i]);
+
+    outFile = fopen("outMergeDesc.dat", "w");
+
+    for(int i = n - 1; i >= 0; i--){ 
+        fprintf(outFile, "%d ", arr[i]);
+    }
+    fclose(outFile);
+
+    printf("Number of Comparisons: %d\n", comp);
+    printf("Actual Execution Time: %ld nanoseconds\n", exec_time);
+}
+
+
+void rand_dat()
+{
+    struct timespec start, end;
+    long exec_time;
+    FILE *inFile,*outFile;
+    int arr[1000], n=0;
+    inFile = fopen("inRand.dat", "r");
+    if(inFile==NULL)
+    {
+        printf("Error");
+        return;
+    }
+    while(fscanf(inFile, "%d", &arr[n]) == 1)
+        n++;
+    fclose(inFile);
+
+    printf("Before Sorting: ");
+    for(int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+    int comp = 0;
+
+    mergeSort(arr, 0, n - 1);
+
+    printf("After Sorting: ");
+    for(int i = 0; i < n; i++)
+        printf("%d ", arr[i]);
+
+    outFile = fopen("outMergeRand.dat", "w");
+
+    for(int i = 0; i < n; i++){
+        fprintf(outFile, "%d ", arr[i]);
+    }
+    fclose(outFile);
+
+    printf("Number of Comparisons: %d\n", comp);
+    printf("Sorted data written to outMergeRand.dat\n\n");
+    printf("Actual Execution Time: %ld nanoseconds\n", exec_time);
+}
