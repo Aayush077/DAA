@@ -23,97 +23,188 @@ Sample Test Cases
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-int comparisons = 0;
-
-struct Node
-{
+// Node structure definition
+struct Node {
     int data;
     struct Node *next;
-} *first = NULL;
+};
 
-void create_linkedlist(int arr[], int n)
-{
-    int i;
-    struct Node *t, *last;
-    first = (struct Node *)malloc(sizeof(struct Node));
-    first->data = arr[0];
-    first->next = NULL;
-    last = first;
-    for (i = 1; i < n; i++)
-    {
+
+struct Node* create_linkedlist(int arr[], int n) {
+    if (n == 0) {
+        return NULL;
+    }
+    
+    struct Node *head, *t, *last;
+    head = (struct Node *)malloc(sizeof(struct Node));
+    head->data = arr[0];
+    head->next = NULL;
+    last = head;
+
+    for (int i = 1; i < n; i++) {
         t = (struct Node *)malloc(sizeof(struct Node));
         t->data = arr[i];
         t->next = NULL;
         last->next = t;
         last = t;
     }
+    return head;
 }
 
-void display_LinkedList(struct Node *p)
-{
-    while (p != NULL)
-    {
-        printf(" %d", p->data);
+/**
+ * Displays the elements of a linked list.
+ * Pointer to the head of the list.
+ */
+
+void display_LinkedList(struct Node *p) {
+    printf("[");
+    while (p != NULL) {
+        printf("%d", p->data);
+        if (p->next != NULL) {
+            printf(",");
+        }
         p = p->next;
     }
+    printf("]");
 }
 
-void mergeSort(int arr[], int l, int r)
-{
-    if (l < r)
-    {
-        int mid = (l + r) / 2;
-        mergeSort(arr, l, mid);
-        mergeSort(arr, mid + 1, r);
-        merge(arr, l, mid, r);
+/**
+ * Frees all the nodes in a linked list to prevent memory leaks.
+ * The head of the list to be freed.
+ */
+void free_list(struct Node* head) {
+    struct Node *tmp;
+    while (head != NULL) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
     }
 }
 
-void merge(int arr[], int l, int mid, int h)
-{
-    int B[500];
-    int i = l, j = mid + 1, k = l;
+/* --- Core Logic for Merging k Lists (Unchanged) --- */
 
-    while (i <= mid && j <= h)
-    {
-        comparisons++; // Count each comparison
-        if (arr[i] < arr[j])
-            B[k++] = arr[i++];
-        else
-            B[k++] = arr[j++];
+
+struct Node* mergeTwoLists(struct Node* l1, struct Node* l2) {
+    struct Node temp;
+    struct Node* tail = &temp;
+    temp.next = NULL;
+
+    while (l1 != NULL && l2 != NULL) {
+        if (l1->data < l2->data) {
+            tail->next = l1;
+            l1 = l1->next;
+        } else {
+            tail->next = l2;
+            l2 = l2->next;
+        }
+        tail = tail->next;
     }
-    for (; i <= mid; i++)
-        B[k++] = arr[i++];
-    for (; j <= h; j++)
-        B[k++] = arr[j++];
 
-    for (i = l; i <= h; i++)
-        arr[i] = B[i];
+    if (l1 != NULL) {
+        tail->next = l1;
+    } else {
+        tail->next = l2;
+    }
+
+    return temp.next;
 }
 
-int main()
-{
-    int n, c, x;
-    printf("Enter the size: ");
-    scanf("%d", &n);
-    int arr[n];
-    printf("Enter the elements: ");
-    for (int i = 0; i < n; i++)
-    {
-        scanf("%d", &arr[i]);
+
+struct Node* mergeKLists(struct Node** lists, int k) {
+    if (k == 0) {
+        return NULL;
     }
 
-    create_linkedlist(arr, n);
-    display_LinkedList(first);
-
-    mergeSort(arr, 0, n - 1);
-    printf("Sorted array: ");
-    for (int i = 0; i < n; i++)
-    {
-        printf("%d ", arr[i]);
+    while (k > 1) {
+        int new_k = 0;
+        for (int i = 0; i < k; i += 2) {
+            if (i + 1 < k) {
+                lists[new_k] = mergeTwoLists(lists[i], lists[i + 1]);
+            } else {
+                lists[new_k] = lists[i];
+            }
+            new_k++;
+        }
+        k = new_k;
     }
+
+    return lists[0];
+}
+
+/**
+ * Main function to take user input and run the mergeKLists function.
+ */
+int main() {
+    int k;
+    printf("Enter the number of linked lists (k): ");
+    scanf("%d", &k);
+
+    if (k <= 0) {
+        printf("No lists to merge.\n");
+        return 0;
+    }
+
+    // Dynamically allocate an array to hold the heads of k lists
+    struct Node** lists = (struct Node**)malloc(k * sizeof(struct Node*));
+    if (lists == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    // Loop to get input for each of the k lists
+    for (int i = 0; i < k; i++) {
+        int n;
+        printf("\nEnter the number of elements for list %d: ", i + 1);
+        scanf("%d", &n);
+
+        if (n == 0) {
+            lists[i] = NULL;
+            continue;
+        }
+
+        // Dynamically allocate an array for the elements of the current list
+        int* arr = (int*)malloc(n * sizeof(int));
+        if (arr == NULL) {
+            printf("Memory allocation failed for list elements!\n");
+            // Free previously allocated memory before exiting
+            for (int j = 0; j < i; j++) {
+                free_list(lists[j]);
+            }
+            free(lists);
+            return 1;
+        }
+        
+        printf("Enter the %d sorted elements for list %d (space-separated): ", n, i + 1);
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &arr[j]);
+        }
+
+        // Create the linked list from the user's array
+        lists[i] = create_linkedlist(arr, n);
+        
+        // Free the temporary integer array as it's no longer needed
+        free(arr);
+    }
+
+    printf("\n--- Input Lists ---\n");
+    for (int i = 0; i < k; i++) {
+        printf("List %d: ", i + 1);
+        display_LinkedList(lists[i]);
+        printf("\n");
+    }
+    
+    // Merge all the lists
+    struct Node* merged_head = mergeKLists(lists, k);
+
+    // Display the final result
+    printf("\n--- Merged Sorted List ---\n");
+    display_LinkedList(merged_head);
     printf("\n");
-    printf("Total comparisons made: %d\n", comparisons);
+
+    // Clean up all dynamically allocated memory
+    free_list(merged_head);
+    free(lists);
+    
+    return 0;
 }
